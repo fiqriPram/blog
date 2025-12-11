@@ -1,29 +1,27 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
+import { supabase } from "@/lib/supabase";
+import { PostType } from "@/types/post";
+import DeleteButton from "@/components/DeleteButton";
 
-const posts = {
-  "hello-world": {
-    title: "Hello World",
-    content:
-      "Welcome to my minimal blog. This is the first post. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.",
-    date: "2023-10-01",
-  },
-  "second-post": {
-    title: "Second Post",
-    content:
-      "This is another post in the blog. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.",
-    date: "2023-10-02",
-  },
-  "third-post": {
-    title: "Third Post",
-    content:
-      "Yet another interesting post. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.",
-    date: "2023-10-03",
-  },
-};
+export default async function Post(props: {
+  params: Promise<{ slug: string }>;
+}) {
+  const params = await props.params;
+  const { data: posts, error } = await supabase
+    .from("posts")
+    .select("*")
+    .order("date", { ascending: false });
 
-export default function Post({ params }: { params: { slug: string } }) {
-  const post = posts[params.slug as keyof typeof posts];
+  if (error) {
+    console.error("Error fetching posts:", error);
+    notFound();
+  }
+
+  console.log("Posts:", posts);
+  console.log("Slug:", params.slug);
+  const post = posts.find((p: PostType) => p.slug === params.slug);
+  console.log("Found post:", post);
 
   if (!post) {
     notFound();
@@ -43,14 +41,15 @@ export default function Post({ params }: { params: { slug: string } }) {
             {post.title}
           </h1>
           <time className="text-sm text-gray-500 mb-8 block">{post.date}</time>
-          <div className="prose prose-gray max-w-none">
+          <div className="prose prose-gray max-w-none text-gray-900">
             <p>{post.content}</p>
           </div>
         </article>
-        <div className="mt-8">
+        <div className="mt-8 flex justify-between items-center">
           <Link href="/" className="text-gray-600 hover:text-gray-900">
             ← Back to posts
           </Link>
+          <DeleteButton slug={post.slug} />
         </div>
       </main>
     </div>
