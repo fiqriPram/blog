@@ -3,7 +3,10 @@ import Link from "next/link";
 import { supabase } from "@/lib/supabase";
 import { PostType } from "@/types/post";
 
-export default async function Post({ params }: { params: { slug: string } }) {
+export default async function Post(props: {
+  params: Promise<{ slug: string }>;
+}) {
+  const params = await props.params;
   const { data: posts, error } = await supabase
     .from("posts")
     .select("*")
@@ -14,7 +17,10 @@ export default async function Post({ params }: { params: { slug: string } }) {
     notFound();
   }
 
+  console.log("Posts:", posts);
+  console.log("Slug:", params.slug);
   const post = posts.find((p: PostType) => p.slug === params.slug);
+  console.log("Found post:", post);
 
   if (!post) {
     notFound();
@@ -34,7 +40,7 @@ export default async function Post({ params }: { params: { slug: string } }) {
             {post.title}
           </h1>
           <time className="text-sm text-gray-500 mb-8 block">{post.date}</time>
-          <div className="prose prose-gray max-w-none">
+          <div className="prose prose-gray max-w-none text-gray-900">
             <p>{post.content}</p>
           </div>
         </article>
