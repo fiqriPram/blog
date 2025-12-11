@@ -78,3 +78,36 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "Failed to save post" }, { status: 500 });
   }
 }
+
+export async function DELETE(request: NextRequest) {
+  if (
+    !process.env.NEXT_PUBLIC_SUPABASE_URL ||
+    !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+  ) {
+    return NextResponse.json(
+      { error: "Supabase environment variables not set" },
+      { status: 500 }
+    );
+  }
+
+  const { searchParams } = new URL(request.url);
+  const slug = searchParams.get("slug");
+
+  if (!slug) {
+    return NextResponse.json({ error: "Slug required" }, { status: 400 });
+  }
+
+  try {
+    const { error } = await supabase.from("posts").delete().eq("slug", slug);
+
+    if (error) throw error;
+
+    return NextResponse.json({ success: true });
+  } catch (error) {
+    console.error("Error deleting post:", error);
+    return NextResponse.json(
+      { error: "Failed to delete post" },
+      { status: 500 }
+    );
+  }
+}

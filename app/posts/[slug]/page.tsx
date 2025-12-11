@@ -2,6 +2,7 @@ import { notFound } from "next/navigation";
 import Link from "next/link";
 import { supabase } from "@/lib/supabase";
 import { PostType } from "@/types/post";
+import DeleteButton from "@/components/DeleteButton";
 
 export default async function Post(props: {
   params: Promise<{ slug: string }>;
@@ -44,10 +45,11 @@ export default async function Post(props: {
             <p>{post.content}</p>
           </div>
         </article>
-        <div className="mt-8">
+        <div className="mt-8 flex justify-between items-center">
           <Link href="/" className="text-gray-600 hover:text-gray-900">
             ← Back to posts
           </Link>
+          <DeleteButton slug={post.slug} />
         </div>
       </main>
     </div>
