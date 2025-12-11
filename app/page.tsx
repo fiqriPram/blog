@@ -28,9 +28,14 @@ export default async function Home() {
             <h1 className="text-4xl font-light text-gray-900">Minimal Blog</h1>
             <p className="text-gray-600 mt-2">Thoughts and ideas</p>
           </div>
-          <Link href="/write" className="text-gray-600 hover:text-gray-900">
-            Write Post
-          </Link>
+          <div className="flex space-x-4">
+            <Link href="/profile" className="text-gray-600 hover:text-gray-900">
+              Profile
+            </Link>
+            <Link href="/write" className="text-gray-600 hover:text-gray-900">
+              Write Post
+            </Link>
+          </div>
         </div>
       </header>
       <main className="max-w-4xl mx-auto px-4 py-8">
