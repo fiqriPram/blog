@@ -1,13 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { supabase } from "../../../lib/supabase";
 
-type Post = {
-  slug: string;
-  title: string;
-  content: string;
-  date: string;
-};
-
 export async function GET() {
   if (
     !process.env.NEXT_PUBLIC_SUPABASE_URL ||
