@@ -7,4 +7,5 @@ export interface ProfileData {
   email: string;
   linkedin: string;
   github: string;
+  followers?: number;
 }

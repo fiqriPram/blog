@@ -4,12 +4,15 @@ import Image from "next/image";
 import { useState, useEffect } from "react";
 import { supabase } from "@/lib/supabase";
 import { ProfileData } from "@/types/profile";
+import LogoutButton from "@/components/LogoutButton";
 
 export default function Profile() {
   const [avatarUrl, setAvatarUrl] = useState("/avatar.jpg");
   const [isEditing, setIsEditing] = useState(false);
   const [profile, setProfile] = useState<ProfileData | null>(null);
   const [loading, setLoading] = useState(true);
+  const [followersCount, setFollowersCount] = useState(0);
+  const [isFollowing, setIsFollowing] = useState(false);
 
   useEffect(() => {
     const loadProfile = async () => {
@@ -23,6 +26,7 @@ export default function Profile() {
 
         setProfile(data);
         setAvatarUrl(data.avatar_url || "/avatar.jpg");
+        setFollowersCount(data.followers || 0);
       } catch (error) {
         console.error("Error loading profile:", error);
         // Fallback to defaults
@@ -41,7 +45,9 @@ export default function Profile() {
           email: "fiqri@example.com",
           linkedin: "https://linkedin.com/in/fiqripramana",
           github: "https://github.com/fiqripram",
+          followers: 0,
         });
+        setFollowersCount(0);
       } finally {
         setLoading(false);
       }
@@ -83,6 +89,21 @@ export default function Profile() {
     const newExpertise = [...profile.expertise];
     newExpertise[index] = value;
     setProfile({ ...profile, expertise: newExpertise });
+  };
+
+  const handleFollow = async () => {
+    const newCount = isFollowing ? followersCount - 1 : followersCount + 1;
+    setFollowersCount(newCount);
+    setIsFollowing(!isFollowing);
+
+    try {
+      await supabase
+        .from("profiles")
+        .update({ followers: newCount })
+        .eq("id", 1);
+    } catch (error) {
+      console.error("Error updating followers:", error);
+    }
   };
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -131,22 +152,6 @@ export default function Profile() {
     );
   }
 
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-white flex items-center justify-center">
-        Loading...
-      </div>
-    );
-  }
-
-  if (!profile) {
-    return (
-      <div className="min-h-screen bg-white flex items-center justify-center">
-        Error loading profile
-      </div>
-    );
-  }
-
   return (
     <div className="min-h-screen bg-white">
       <header className="border-b border-gray-200 py-8">
@@ -155,12 +160,15 @@ export default function Profile() {
             <h1 className="text-4xl font-light text-gray-900">Profile</h1>
             <p className="text-gray-600 mt-2">About the author</p>
           </div>
-          <button
-            onClick={() => (isEditing ? handleSave() : setIsEditing(true))}
-            className="bg-gray-800 text-white px-4 py-2 rounded-md hover:bg-gray-700"
-          >
-            {isEditing ? "Save" : "Edit"}
-          </button>
+          <div className="flex space-x-2">
+            <button
+              onClick={() => (isEditing ? handleSave() : setIsEditing(true))}
+              className="bg-gray-800 text-white px-4 py-2 rounded-md hover:bg-gray-700"
+            >
+              {isEditing ? "Save" : "Edit"}
+            </button>
+            <LogoutButton />
+          </div>
         </div>
       </header>
       <main className="max-w-4xl mx-auto px-4 py-8">
@@ -213,6 +221,14 @@ export default function Profile() {
                   {profile.name}
                 </h2>
                 <p className="text-gray-900 text-center">{profile.title}</p>
+                <div className="text-center">
+                  <a
+                    href="/followers"
+                    className="text-gray-600 hover:text-gray-800"
+                  >
+                    {followersCount} followers
+                  </a>
+                </div>
               </>
             )}
           </div>
